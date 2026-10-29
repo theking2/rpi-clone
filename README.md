@@ -44,11 +44,13 @@ install needed packages.  But currently rpi-clone knows how to install
 only Debian packages with apt-get.
 
 #### On a Raspberry Pi:
+
+```sh
+	git clone https://github.com/billw2/rpi-clone.git 
+	cd rpi-clone
+	sudo cp rpi-clone rpi-clone-setup /usr/local/sbin
 ```
-	$ git clone https://github.com/billw2/rpi-clone.git 
-	$ cd rpi-clone
-	$ sudo cp rpi-clone rpi-clone-setup /usr/local/sbin
-```
+
 Make sure /usr/local/sbin is in your $PATH and then run
 rpi-clone or rpi-clone-setup with no args to print usage.
 
