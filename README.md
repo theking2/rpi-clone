@@ -1,4 +1,5 @@
 ## rpi-clone
+
 Latest version: 2.0.22
 
 Version 2 is a complete rewrite with improved capability over
@@ -16,6 +17,7 @@ using rpi-clone.  See On other OS below.
 
 
 #### Clone by initialization
+
 An initialization clone starts by imaging the source disk partition
 table to the destination disk This is is a convenience that gets
 the destination disk partitioned so you can avoid manual partitioning.
@@ -29,6 +31,7 @@ a destination disk with file systems made to match the types in the
 source partitions.  See example 7 below.
 
 #### Clone by syncing
+
 If the source and destination disk partition file system types match,
 the clone does not start over with a partition table image and making of
 filesytems, but instead mounts destination partitions corresponding to the
@@ -37,6 +40,7 @@ operation is an incremental sync which copies only the files that have
 changed in the source disk and is much faster than an initilization clone.
 
 ## Install
+
 rpi-clone is on github and is downloaded by cloning the repository.
 It is a standalone script and the install is a simple copy to a
 bin directory.  When run it checks its program dependencies and offers to
@@ -44,33 +48,40 @@ install needed packages.  But currently rpi-clone knows how to install
 only Debian packages with apt-get.
 
 #### On a Raspberry Pi:
+
+```sh
+	git clone https://github.com/billw2/rpi-clone.git 
+	cd rpi-clone
+	sudo cp rpi-clone rpi-clone-setup /usr/local/sbin
 ```
-	$ git clone https://github.com/billw2/rpi-clone.git 
-	$ cd rpi-clone
-	$ sudo cp rpi-clone rpi-clone-setup /usr/local/sbin
-```
+
 Make sure /usr/local/sbin is in your $PATH and then run
 rpi-clone or rpi-clone-setup with no args to print usage.
 
 rpi-clone-setup is for setting the hostname in /etc/hostname and /etc/hosts
 files.  It is run automatically by rpi-clone if -s args are given,
 but before your first clone using a -s option, test run rpi-clone-setup with:
+
+```sh
+      sudo rpi-clone-setup -t testhostname
 ```
-      $ sudo rpi-clone-setup -t testhostname
-```
+
 And check the files under /tmp/clone-test to be sure the files have been
 edited correctly.  If you need additional customizations to a clone,
 add them to the rpi-clone-setup script.
 
 #### On other OS:
+
   To install on another OS, rpi-clone may be renamed to suit.  For example,
   on my Debian desktop I rename:
+  
+```sh
+	git clone https://github.com/billw2/rpi-clone.git 
+	cd rpi-clone
+	sudo cp rpi-clone /usr/local/sbin/sys-clone
+	sudo cp rpi-clone-setup /usr/local/sbin/sys-clone-setup
 ```
-	$ git clone https://github.com/billw2/rpi-clone.git 
-	$ cd rpi-clone
-	$ sudo cp rpi-clone /usr/local/sbin/sys-clone
-	$ sudo cp rpi-clone-setup /usr/local/sbin/sys-clone-setup
-```
+
 On SD card systems other than Raspberry Pi, rpi-clone may work
 because an initialize clone images the sectors through the start
 of partition 1 to capture the partition table and possible boot loader blocks.
@@ -97,129 +108,151 @@ mount my internal drive partitions instead of the USB partitions.  But
 I use PARTUUID so there will not be cross mounting.  And I have a couple
 of extra grub menu entries with other root variations just in case.
 
-
 ## Usage
+
 To get a usage screen showing available options,
 run rpi-clone without any arguments:
-```
-pi@rpi0: $ sudo rpi-clone
-No destination disk given.
 
-usage: sys-clone sdN {-v|--verbose} {-f|--force-initialize} {-f2}
-         {-u|--unattended} {-U|--Unattended} {-q|--quiet}
-         {-s|--setup host} {-e|--edit-fstab sdX } {-m|--mountdir dir }
-         {-L|--label-partitions label} {-l|--leave-sd-usb-boot}
-         {-a|--all-sync} {-F|--Force-sync} {-x} {-V|--version}
-         {--convert-fstab-to-partuuid}
-         {--exclude=PATTERN} {--exclude-from=FILE}
-
-    -v	    - verbose rsync, list all files as they are copied.
-    -f	    - force initialize the destination disk by imaging the booted disk
-                partition structure.  File systems are then synced or imaged.
-    -f2	    - force initialize only the first 2 partitions to the destination.
-                So a multi partition USB boot can initialize clone back to
-                a 2 partition SD card.
-    -p size - resize destination partition 1 to 'size' bytes. For two partition
-                initialize (when first clone to blank disk or using -f2 or -f).
-                Use 'sizeM' for MiB size units. eg -p 256M equals -p 268435456
-    -u	    - unattended clone if not initializing.  No confirmations asked,
-                but abort if disk needs initializing or on error.
-    -U      - unattended even if initializing. No confirmations asked,
-                but abort only on errors.
-    -q      - quiet mode, no output unless errors or initializing. Implies -u.
-    -s host - add 'host' to args passed to script rpi-clone-setup and run it
-                after cloning but before unmounting partitions. For setting
-                clone disk hostname, but args can be what the script expects.
-                You can give multiple -s arg options.
-    -e sdX  - edit destination fstab to change booted device names to new
-      	        device 'sdX'.  This is Only for fstabs that use device names.
-                Used for setting up a USB bootable disk.
-    -m dir  - Add dir to a custom list of mounted directories to sync.  Then
-                the custom list will be synced instead of the default of all
-                mounted directories.  The root directory is always synced.
-                Not for when initializing.
-    -L lbl  - label for ext type partitions.  If 'lbl' ends with '#', replace
-				the '#' with a partition number and label all ext partitions.
-                Otherwise apply label to root partition only.
-    -l      - leave SD card to USB boot alone when cloning to SD card mmcblk0
-                from a USB boot.  This preserves a SD card to USB boot setup
-                by leaving the SD card cmdline.txt using the USB root.	When
-                cloning to USB from SD card this option sets up the SD card
-                cmdline.txt to boot to the USB disk.
-    -a      - Sync all partitions if types compatible, not just mounted ones.
-    -F      - force file system sync or image for some errors. eg:
-                If source used > destination space error, do the sync anyway.
-                If a source partition mount error, skip it and do other syncs.
-    -x      - use set -x for very verbose bash shell script debugging
-    -V      - print rpi-clone version.
 ```
-+ See examples below for usage of these command line options.
-+ rpi-clone version 1 briefly had a -s option that is replaced with a
-  -s option that has different meaning.
-+ **--convert-fstab-to-partuuid** converts the booted fstab from using device
-names to PARTUUID.  This is a helper if you wish to convert to PARTUUID as
-is standard in recent Raspbian distributions.  After running, PARTUUID
-usage will propagate to subsequent clones.  This changes the booted fstab
-and cmdline.txt, so have a backup first.
-+ FUSE mounts (ssh mounts) should be unmounted before cloning or else the
-directory mounted on will not stat and the directory will not be made on the
-clone.  You will get a readlink stat error from rsync because root can't access
-a users FUSE mount - only the user can.
-+ The examples below show a /boot partition smaller than recommended for the
-recent Rasbian Buster release. rpi-clone version 2.0.21 adds the -p option so
-the /boot partition can be resized at the same time the root partition is
-resized to the end of the disk.  If you upgraded Stretch to Buster and are
-running with a small /boot, then for the clone to have a resized /boot, run:
-```
-	$ rpi-clone -f -p 256M sda
+sudo rpi-clone
 ```
 
+	No destination disk given.
+	
+	usage: sys-clone sdN {-v|--verbose} {-f|--force-initialize} {-f2}
+	         {-u|--unattended} {-U|--Unattended} {-q|--quiet}
+	         {-s|--setup host} {-e|--edit-fstab sdX } {-m|--mountdir dir }
+	         {-L|--label-partitions label} {-l|--leave-sd-usb-boot}
+	         {-a|--all-sync} {-F|--Force-sync} {-x} {-V|--version}
+	         {--convert-fstab-to-partuuid}
+	         {--exclude=PATTERN} {--exclude-from=FILE}
+	
+	    -v	    - verbose rsync, list all files as they are copied.
+	    -f	    - force initialize the destination disk by imaging the booted disk
+	                partition structure.  File systems are then synced or imaged.
+	    -f2	    - force initialize only the first 2 partitions to the destination.
+	                So a multi partition USB boot can initialize clone back to
+	                a 2 partition SD card.
+	    -p size - resize destination partition 1 to 'size' bytes. For two partition
+	                initialize (when first clone to blank disk or using -f2 or -f).
+	                Use 'sizeM' for MiB size units. eg -p 256M equals -p 268435456
+	    -u	    - unattended clone if not initializing.  No confirmations asked,
+	                but abort if disk needs initializing or on error.
+	    -U      - unattended even if initializing. No confirmations asked,
+	                but abort only on errors.
+	    -q      - quiet mode, no output unless errors or initializing. Implies -u.
+	    -s host - add 'host' to args passed to script rpi-clone-setup and run it
+	                after cloning but before unmounting partitions. For setting
+	                clone disk hostname, but args can be what the script expects.
+	                You can give multiple -s arg options.
+	    -e sdX  - edit destination fstab to change booted device names to new
+	      	        device 'sdX'.  This is Only for fstabs that use device names.
+	                Used for setting up a USB bootable disk.
+	    -m dir  - Add dir to a custom list of mounted directories to sync.  Then
+	                the custom list will be synced instead of the default of all
+	                mounted directories.  The root directory is always synced.
+	                Not for when initializing.
+	    -L lbl  - label for ext type partitions.  If 'lbl' ends with '#', replace
+					the '#' with a partition number and label all ext partitions.
+	                Otherwise apply label to root partition only.
+	    -l      - leave SD card to USB boot alone when cloning to SD card mmcblk0
+	                from a USB boot.  This preserves a SD card to USB boot setup
+	                by leaving the SD card cmdline.txt using the USB root.	When
+	                cloning to USB from SD card this option sets up the SD card
+	                cmdline.txt to boot to the USB disk.
+	    -a      - Sync all partitions if types compatible, not just mounted ones.
+	    -F      - force file system sync or image for some errors. eg:
+	                If source used > destination space error, do the sync anyway.
+	                If a source partition mount error, skip it and do other syncs.
+	    -x      - use set -x for very verbose bash shell script debugging
+	    -V      - print rpi-clone version.
+	```
+	+ See examples below for usage of these command line options.
+	+ rpi-clone version 1 briefly had a -s option that is replaced with a
+	  -s option that has different meaning.
+	+ **--convert-fstab-to-partuuid** converts the booted fstab from using device
+	names to PARTUUID.  This is a helper if you wish to convert to PARTUUID as
+	is standard in recent Raspbian distributions.  After running, PARTUUID
+	usage will propagate to subsequent clones.  This changes the booted fstab
+	and cmdline.txt, so have a backup first.
+	+ FUSE mounts (ssh mounts) should be unmounted before cloning or else the
+	directory mounted on will not stat and the directory will not be made on the
+	clone.  You will get a readlink stat error from rsync because root can't access
+	a users FUSE mount - only the user can.
+	+ The examples below show a /boot partition smaller than recommended for the
+	recent Rasbian Buster release. rpi-clone version 2.0.21 adds the -p option so
+	the /boot partition can be resized at the same time the root partition is
+	resized to the end of the disk.  If you upgraded Stretch to Buster and are
+	running with a small /boot, then for the clone to have a resized /boot, run:
+	
+		$ rpi-clone -f -p 256M sda
+	
+	
 
 ## rpi-clone Example Runs
+
 #### 0) Examples review - a quick guide to what the examples cover in detail.
+
 1. Typical two partition clones - SD card or USB disk to USB disk:
+
+```sh
+	rpi-clone sda
 ```
-	$ rpi-clone sda
-```
+
 2. USB boot - clone back to SD card slot:
+
+```sh
+	rpi-clone mmcblk0
 ```
-	$ rpi-clone mmcblk0
-```
+
 3. Clone to USB disk intended for use as a standalone Pi3 bootable
 disk.  No special rpi-clone args are required.
 4. SD card to USB disk clone to create a SD card to USB boot setup:
-```
-If fstab uses PARTUUID:
-	$ rpi-clone -l sda
-If fstab uses device names:
-	$ rpi-clone -l sda -e sda
-```
+
+
+if fstab uses PARTUUID: `rpi-clone -l sda`
+
+if fstab uses device names: `rpi-clone -l sda -e sda`
+
 5. USB boot clone back to SD card slot that preserves SD card to USB boot setup:
+
+```sh
+	rpi-clone -l mmcblk0
 ```
-	$ rpi-clone -l mmcblk0
-```
+
 6. Attempted clone to a disk that is too small.
 7. Manually partition a disk with three partitions so it can
 be cloned to from a two partition boot.
 8. Clone from three partition disk to smaller disk large enough
 to hold the source three partitions.
+
+```sh
+	rpi-clone sdb
 ```
-	$ rpi-clone sdb
-```
+
 9. Clone from three partition disk to smaller disk (sdN or mmcblk0)
 not large enough to hold the source three partitions.
 A first initialize clone forces a clone of only the first two partitions:
+
+```sh
+	rpi-clone sdb -f2
 ```
-	$ rpi-clone sdb -f2
-```
+
 10. Subsequent sync clones from three partition disk to two partition
 disk (sdN or mmcblk0):
-```
+
 If the source third partition is not mounted:
-	$ rpi-clone sdb
-If the source third partition is mounted, select partitions to clone:
-	$ rpi-clone sdb -m /boot
+
+```sh
+	rpi-clone sdb
 ```
+
+If the source third partition is mounted, select partitions to clone:
+
+```sh
+	rpi-clone sdb -m /boot
+```
+
 **Note** - if a larger USB disk is manually partitioned to create more than
 three partitions as in example 7, a smaller disk can be initialize
 cloned to only if it is large enough to hold at least part of the last
@@ -228,10 +261,11 @@ If it is not, then the clone will have to be to a two partition -f2
 clone or a clone to a manually partitioned destination.  So, for a
 multi partition disk, select partition number and sizes with a eye
 towards how you will be cloning back to smaller disks.
+
 11. Desktop demo
 
-
 #### 1) First clone to a new SD card in USB card reader
+
 In this example a new SD card in a USB card reader has been plugged in
 that I want to clone to, but it could also be to a USB disk or from a
 USB disk back to the SD card slot.
