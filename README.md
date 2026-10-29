@@ -67,14 +67,17 @@ edited correctly.  If you need additional customizations to a clone,
 add them to the rpi-clone-setup script.
 
 #### On other OS:
-  To install on another OS, rpi-clone may be renamed to suit.  For example,
-  on my Debian desktop I rename:
+
+To install on another OS, rpi-clone may be renamed to suit.  For example,
+on my Debian desktop I rename:
+  
+```sh
+git clone https://github.com/billw2/rpi-clone.git 
+cd rpi-clone
+sudo cp rpi-clone /usr/local/sbin/sys-clone
+sudo cp rpi-clone-setup /usr/local/sbin/sys-clone-setup
 ```
-	$ git clone https://github.com/billw2/rpi-clone.git 
-	$ cd rpi-clone
-	$ sudo cp rpi-clone /usr/local/sbin/sys-clone
-	$ sudo cp rpi-clone-setup /usr/local/sbin/sys-clone-setup
-```
+
 On SD card systems other than Raspberry Pi, rpi-clone may work
 because an initialize clone images the sectors through the start
 of partition 1 to capture the partition table and possible boot loader blocks.
@@ -103,6 +106,7 @@ of extra grub menu entries with other root variations just in case.
 
 
 ## Usage
+
 To get a usage screen showing available options,
 run rpi-clone without any arguments:
 ```
