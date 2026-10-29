@@ -46,9 +46,9 @@ only Debian packages with apt-get.
 #### On a Raspberry Pi:
 
 ```sh
-	git clone https://github.com/billw2/rpi-clone.git 
-	cd rpi-clone
-	sudo cp rpi-clone rpi-clone-setup /usr/local/sbin
+git clone https://github.com/billw2/rpi-clone.git 
+cd rpi-clone
+sudo cp rpi-clone rpi-clone-setup /usr/local/sbin
 ```
 
 Make sure /usr/local/sbin is in your $PATH and then run
@@ -57,9 +57,11 @@ rpi-clone or rpi-clone-setup with no args to print usage.
 rpi-clone-setup is for setting the hostname in /etc/hostname and /etc/hosts
 files.  It is run automatically by rpi-clone if -s args are given,
 but before your first clone using a -s option, test run rpi-clone-setup with:
+
+```sh
+sudo rpi-clone-setup -t testhostname
 ```
-      $ sudo rpi-clone-setup -t testhostname
-```
+
 And check the files under /tmp/clone-test to be sure the files have been
 edited correctly.  If you need additional customizations to a clone,
 add them to the rpi-clone-setup script.
